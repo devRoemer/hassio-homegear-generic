@@ -1,0 +1,24 @@
+{
+  "name": "Homegear",
+  "version": "dev",
+  "slug": "homegear",
+  "description": "Homegear add-on",
+  "url": "https://github.com/devRoemer/hassio-homegear-generic",
+  "arch": ["aarch64", "amd64", "armhf", "armv7", "i386"],
+  "startup": "services",
+  "webui": "http://[HOST]:[PORT:2001]",
+  "uart": true,
+  "gpio": true,
+  "privileged": ["SYS_ADMIN", "SYS_RAWIO"],
+  "map": ["config:rw", "share:rw"],
+  "ports": {
+    "2001/tcp": 2001,
+    "2002/tcp": 2002,
+    "2003/tcp": 2003
+  },
+  "ports_description": {
+    "2001/tcp": "Homegear Web-Interface",
+    "2002/tcp": "Homegear port 2002",
+    "2003/tcp": "Homegear port 2003"
+  }
+}
