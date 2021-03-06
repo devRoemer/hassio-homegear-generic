@@ -47,18 +47,14 @@ if ! [ "$(ls -A /var/lib/homegear)" ]; then
 else
 	rm -Rf /var/lib/homegear/modules/*
 	mkdir -p /var/lib/homegear.data/modules
-	[ "$(cp -a /var/lib/homegear.data/modules/* /var/lib/homegear/modules/)" -ne 0 ] && echo "Could not copy modules to \"homegear.data/modules/\". Please check the permissions on this directory and make sure it is writeable."
+	cp -a /var/lib/homegear.data/modules/* /var/lib/homegear/modules/ || echo "Could not copy modules to \"homegear.data/modules/\". Please check the permissions on this directory and make sure it is writeable."
 
 	rm -Rf /var/lib/homegear/flows/nodes/*
 	mkdir -p /var/lib/homegear.data/node-blue/nodes
-	[ "$(cp -a /var/lib/homegear.data/node-blue/nodes/* /var/lib/homegear/node-blue/nodes/)" -ne 0 ] && echo "Could not copy nodes to \"homegear.data/node-blue/nodes\". Please check the permissions on this directory and make sure it is writeable."
-
-	rm -Rf /var/lib/homegear/node-blue/node-red
-	[ "$(cp -a /var/lib/homegear.data/node-blue/node-red /var/lib/homegear/node-blue/)" -ne 0 ] && echo "Could not copy nodes to \"homegear.data/node-blue/node-red\". Please check the permissions on this directory and make sure it is writeable."
+	cp -a /var/lib/homegear.data/node-blue/nodes/* /var/lib/homegear/node-blue/nodes/ || echo "Could not copy nodes to \"homegear.data/node-blue/nodes\". Please check the permissions on this directory and make sure it is writeable."
 
 	rm -Rf /var/lib/homegear/node-blue/www
-	[ "$(cp -a /var/lib/homegear.data/node-blue/www /var/lib/homegear/node-blue/)" -ne 0 ] && echo "Could not copy Node-BLUE frontend to \"homegear.data/node-blue/www\". Please check the permissions on this directory and make sure it is writeable."
-
+	cp -a /var/lib/homegear.data/node-blue/www /var/lib/homegear/node-blue/ || echo "Could not copy Node-BLUE frontend to \"homegear.data/node-blue/www\". Please check the permissions on this directory and make sure it is writeable."
 
 	cd /var/lib/homegear/admin-ui || echo "Directory /var/lib/homegear/admin-ui not found."
 	# shellcheck disable=SC2010
@@ -66,7 +62,7 @@ else
 	mkdir -p /var/lib/homegear.data/admin-ui
 	cp -a /var/lib/homegear.data/admin-ui/* /var/lib/homegear/admin-ui/
 	[ ! -f /var/lib/homegear/admin-ui/.env ] && cp -a /var/lib/homegear.data/admin-ui/.env /var/lib/homegear/admin-ui/
-	[ "$(cp -a /var/lib/homegear.data/admin-ui/.version /var/lib/homegear/admin-ui/)" -ne 0 ] && echo "Could not copy admin UI to \"homegear.data/admin-ui\". Please check the permissions on this directory and make sure it is writeable."
+	cp -a /var/lib/homegear.data/admin-ui/.version /var/lib/homegear/admin-ui/ || echo "Could not copy admin UI to \"homegear.data/admin-ui\". Please check the permissions on this directory and make sure it is writeable."
 
 fi
 
@@ -101,7 +97,6 @@ chown -R root:root /etc/homegear
 chown ${USER}:${USER} /etc/homegear/*.key
 chown ${USER}:${USER} /etc/homegear/*.pem
 chown ${USER}:${USER} /etc/homegear/nodeBlueCredentialKey.txt
-chown ${USER}:${USER} /etc/homegear/ca/private/*.key
 find /etc/homegear -type d -exec chmod 755 {} \;
 chown -R ${USER}:${USER} /var/log/homegear /var/lib/homegear
 find /var/log/homegear -type d -exec chmod 750 {} \;
