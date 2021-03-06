@@ -18,18 +18,18 @@ This add-on repository contains the Homegear add-on for Hassio (Home Assistant).
 
 Homegear is a free and open source program to interface your home automation devices or services with your home automation software or scripts. Currently supported are the following device families/systems:
 
-* KNX
-* EnOcean
-* Beckhoff BK90x0
-* HomeMatic BidCoS
-* HomeMatic Wired
-* Insteon
-* Philips Hue
-* Sonos
-* MAX!
-* Intertechno
-* Kodi
-* IP cams
+- KNX
+- EnOcean
+- Beckhoff BK90x0
+- HomeMatic BidCoS
+- HomeMatic Wired
+- Insteon
+- Philips Hue
+- Sonos
+- MAX!
+- Intertechno
+- Kodi
+- IP cams
 
 See [homegear.eu](https://homegear.eu/) for further details.
 
