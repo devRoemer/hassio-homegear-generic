@@ -113,6 +113,20 @@ fi
 mkdir -p /var/run/homegear
 chown ${USER}:${USER} /var/run/homegear
 
+# Add user to the group of all /dev/ttyUSB and /devttyAMA devices so that they are usable
+DEVICE_GROUPS=$({ stat -c '%g' /dev/ttyUSB* 2> /dev/null || : ; stat -c '%g' /dev/ttyAMA* 2> /dev/null || : ; } | sort | uniq)
+echo "${DEVICE_GROUPS}" | while read -r line ; do
+    GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
+
+    if [ -z "${GROUP_NAME}" ]
+    then
+        GROUP_NAME="${USER}-${line}"
+        groupadd -g "${line}" "${GROUP_NAME}"
+    fi
+
+    usermod -a -G "${GROUP_NAME}" "${USER}"
+done
+
 /etc/homegear/homegear-start.sh
 /usr/bin/homegear -u ${USER} -g ${USER} -p /var/run/homegear/homegear.pid &
 sleep 5
