@@ -1,125 +1,64 @@
 ---
-name: CI
+name: Deploy
 
 # yamllint disable-line rule:truthy
 on:
-  push:
-  pull_request:
+  release:
     types:
-      - opened
-      - reopened
-      - synchronize
-  workflow_dispatch:
+      - published
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
   information:
-    name: Gather add-on information
+    if: |
+      github.event_name == 'release'
+      || (
+        github.event_name == 'workflow_run'
+        && github.event.workflow_run.conclusion == 'success'
+      )
+    name: ℹ️ Gather add-on information
     runs-on: ubuntu-latest
     outputs:
       architectures: ${{ steps.information.outputs.architectures }}
       build: ${{ steps.information.outputs.build }}
       description: ${{ steps.information.outputs.description }}
+      environment: ${{ steps.release.outputs.environment }}
       name: ${{ steps.information.outputs.name }}
       slug: "hassio-homegear-generic"
       target: ${{ steps.information.outputs.target }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
       - name: 🚀 Run add-on information action
         id: information
         uses: frenck/action-addon-information@v1.0.0
-
-  lint-addon:
-    name: Lint Add-on
-    needs:
-      - information
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run Add-on Lint
-        uses: frenck/action-addon-linter@v2.0.0
-        with:
-          community: true
-          path: "./${{ needs.information.outputs.target }}"
-
-  lint-hadolint:
-    name: Hadolint
-    needs:
-      - information
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run Hadolint
-        uses: brpaz/hadolint-action@v1.3.1
-        with:
-          dockerfile: "./${{ needs.information.outputs.target }}/Dockerfile"
-
-  lint-json:
-    name: JSON Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run JQ
+      - name: ℹ️ Gather version and environment
+        id: release
         run: |
-          shopt -s globstar
-          cat **/*.json | jq '.'
+          sha="${{ github.sha }}"
+          environment="edge"
+          version="${sha:0:7}"
+          if [[ "${{ github.event_name }}" = "release" ]]; then
+            version="${{ github.event.release.tag_name }}"
+            version="${version,,}"
+            version="${version#v}"
+            environment="stable"
+            if [[ "${{ github.event.release.prerelease }}" = "true" ]]; then
+              environment="beta"
+            fi
+          fi
 
-  lint-markdown:
-    name: MarkdownLint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run mdl
-        uses: actionshub/markdownlint@2.0.2
+          echo "::set-output name=environment::${environment}"
+          echo "::set-output name=version::${version}"
 
-  lint-shellcheck:
-    name: Shellcheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run Shellcheck
-        uses: ludeeus/action-shellcheck@1.0.0
-        env:
-          SHELLCHECK_OPTS: -s bash
-
-  lint-yamllint:
-    name: YAMLLint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run YAMLLint
-        uses: frenck/action-yamllint@v1.1
-
-  lint-prettier:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🚀 Run Prettier
-        uses: creyD/prettier_action@v3.3
-        with:
-          prettier_options: --write **/*.{json,js,md,yaml}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build:
-    name: Build ${{ matrix.architecture }}
-    needs:
-      - information
-      - lint-addon
-      - lint-hadolint
-      - lint-json
-      - lint-markdown
-      - lint-prettier
-      - lint-shellcheck
-      - lint-yamllint
+  deploy:
+    name: 👷 Build & Deploy ${{ matrix.architecture }}
+    needs: information
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -160,10 +99,21 @@ jobs:
             echo "::error ::Could not determine platform for architecture ${{ matrix.architecture }}"
             exit 1
           fi
-      - name: 🚀 Build
+      - name: 🏗  Login to GitHub Container Registry
+        uses: docker/login-action@v1.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_PASSWORD }}
+      - name: 🚀 Build and push
         uses: docker/build-push-action@v2.3.0
         with:
-          push: false
+          push: true
+          # yamllint disable rule:line-length
+          tags: |
+            ghcr.io/devRoemer/${{ needs.information.outputs.slug }}/${{ matrix.architecture }}:${{ needs.information.outputs.environment }}
+            ghcr.io/devRoemer/${{ needs.information.outputs.slug }}/${{ matrix.architecture }}:${{ needs.information.outputs.version }}
+          # yamllint enable rule:line-length
           context: ${{ needs.information.outputs.target }}
           file: ${{ needs.information.outputs.target }}/Dockerfile
           cache-from: |
@@ -179,4 +129,28 @@ jobs:
             BUILD_NAME=${{ needs.information.outputs.name }}
             BUILD_REF=${{ github.sha }}
             BUILD_REPOSITORY=${{ github.repository }}
-            BUILD_VERSION=edge
+            BUILD_VERSION=${{ needs.information.outputs.version }}
+
+  publish-stable:
+    name: 📢 Publish to stable repository
+    if: needs.information.outputs.environment == 'stable'
+    needs:
+      - information
+      - deploy
+    environment:
+      name: ${{ needs.information.outputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Dispatch repository updater update signal
+        uses: peter-evans/repository-dispatch@v1.1.3
+        with:
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          repository: devRoemer/hassio-addon-repository
+          event-type: update
+          client-payload: >
+            {
+              "addon": "${{ needs.information.outputs.slug }}",
+              "name": "${{ needs.information.outputs.name }}",
+              "repository": "${{ github.repository }}",
+              "version": "${{ github.event.release.tag_name }}"
+            }
