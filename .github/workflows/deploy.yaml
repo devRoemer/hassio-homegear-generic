@@ -110,14 +110,14 @@ jobs:
           push: true
           # yamllint disable rule:line-length
           tags: |
-            devroemer/${{ needs.information.outputs.slug }}/${{ matrix.architecture }}:${{ needs.information.outputs.environment }}
-            devroemer/${{ needs.information.outputs.slug }}/${{ matrix.architecture }}:${{ needs.information.outputs.version }}
+            devroemer/${{ needs.information.outputs.slug }}-${{ matrix.architecture }}:${{ needs.information.outputs.environment }}
+            devroemer/${{ needs.information.outputs.slug }}-${{ matrix.architecture }}:${{ needs.information.outputs.version }}
           # yamllint enable rule:line-length
           context: ${{ needs.information.outputs.target }}
           file: ${{ needs.information.outputs.target }}/Dockerfile
           cache-from: |
             type=local,src=/tmp/.docker-cache
-            devroemer/${{ needs.information.outputs.slug }}/${{ matrix.architecture }}:edge
+            devroemer/${{ needs.information.outputs.slug }}-${{ matrix.architecture }}:edge
           cache-to: type=local,mode=max,dest=/tmp/.docker-cache
           platforms: ${{ steps.flags.outputs.platform }}
           build-args: |
