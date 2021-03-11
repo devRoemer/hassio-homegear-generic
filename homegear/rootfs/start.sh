@@ -126,6 +126,7 @@ echo "${DEVICE_GROUPS}" | while read -r line ; do
 
     usermod -a -G "${GROUP_NAME}" "${USER}"
 done
+usermod -a -G "root" "${USER}" # for usb and gpio
 
 /etc/homegear/homegear-start.sh
 /usr/bin/homegear -u ${USER} -g ${USER} -p /var/run/homegear/homegear.pid &
