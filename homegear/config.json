@@ -11,7 +11,7 @@
   "usb": true,
   "gpio": true,
   "privileged": ["SYS_ADMIN", "SYS_RAWIO"],
-  "devices": ["/dev/mem"],
+  "devices": ["/dev/mem", "/dev/spidev0.0"],
   "map": ["config:rw", "share:rw"],
   "ports": {
     "2001/tcp": 2001,
