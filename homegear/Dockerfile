@@ -26,10 +26,8 @@ RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment \
     && echo "LANG=en_US.UTF-8" > /etc/locale.conf \
     && locale-gen en_US.UTF-8
 
-RUN wget https://apt.homegear.eu/Release.key \
-    && apt-key add Release.key \
-    && rm Release.key \
-    && echo 'deb https://apt.homegear.eu/debian/ bullseye/' >> /etc/apt/sources.list.d/homegear.list \
+RUN curl -fsSL https://apt.homegear.eu/Release.key | gpg --dearmor -o /usr/share/keyrings/homegear-archive-keyring.gpg \
+    && echo 'deb [signed-by=/usr/share/keyrings/homegear-archive-keyring.gpg] https://apt.homegear.eu/debian/bullseye/homegear/stable/ bullseye main' > /etc/apt/sources.list.d/homegear.list \
     && apt-get update \
     && apt-get -y install --no-install-recommends \
         libhomegear-node \
