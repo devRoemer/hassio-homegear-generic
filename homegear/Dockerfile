@@ -2,6 +2,8 @@ ARG BUILD_FROM=homeassistant/amd64-base-debian:bullseye
 
 FROM $BUILD_FROM
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 RUN touch /tmp/HOMEGEAR_STATIC_INSTALLATION; \
     touch /.dockerenv;
 
