@@ -26,10 +26,10 @@ RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment \
     && echo "LANG=en_US.UTF-8" > /etc/locale.conf \
     && locale-gen en_US.UTF-8
 
-RUN wget https://homegear.eu/packages/Release.key \
+RUN wget https://apt.homegear.eu/Release.key \
     && apt-key add Release.key \
     && rm Release.key \
-    && echo 'deb https://apt.homegear.eu/Debian/ buster/' >> /etc/apt/sources.list.d/homegear.list \
+    && echo 'deb https://apt.homegear.eu/debian/ buster/' >> /etc/apt/sources.list.d/homegear.list \
     && apt-get update \
     && apt-get -y install --no-install-recommends \
         libhomegear-node \
