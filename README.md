@@ -50,4 +50,4 @@ PullRequests are welcome. Just keep in mind that this addon supports 5 cpu archi
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 [github-actions]: https://github.com/devRoemer/hassio-homegear-generic/actions
 [github-actions-shield]: https://github.com/devRoemer/hassio-homegear-generic/workflows/CI/badge.svg
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2021.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2022.svg
