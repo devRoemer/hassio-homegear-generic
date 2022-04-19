@@ -1,4 +1,4 @@
-ARG BUILD_FROM=homeassistant/amd64-base-debian:buster
+ARG BUILD_FROM=homeassistant/amd64-base-debian:bullseye
 
 FROM $BUILD_FROM
 
@@ -29,7 +29,7 @@ RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment \
 RUN wget https://apt.homegear.eu/Release.key \
     && apt-key add Release.key \
     && rm Release.key \
-    && echo 'deb https://apt.homegear.eu/debian/ buster/' >> /etc/apt/sources.list.d/homegear.list \
+    && echo 'deb https://apt.homegear.eu/debian/ bullseye/' >> /etc/apt/sources.list.d/homegear.list \
     && apt-get update \
     && apt-get -y install --no-install-recommends \
         libhomegear-node \
