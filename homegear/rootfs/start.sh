@@ -14,6 +14,8 @@ trap _term SIGTERM
 
 USER=homegear
 
+echo "Homegear starting as user ${USER}"
+
 mkdir -p /config/homegear \
 	/share/homegear/lib \
 	/share/homegear/log \
@@ -113,18 +115,26 @@ fi
 mkdir -p /var/run/homegear
 chown ${USER}:${USER} /var/run/homegear
 
+printf "\nAttached ttyUSB devices:\n$(ls -al /dev/tty*)\n"
+printf "Attached ttyAMA devices:\n$(ls -al /dev/ttyAMA*)\n"
+printf "Attached spidev devices:\n$(ls -al /dev/spidev*)\n"
+
 # Add user to the group of all /dev/ttyUSB and /devttyAMA devices so that they are usable
 DEVICE_GROUPS=$({ stat -c '%g' /dev/ttyUSB* 2> /dev/null || : ; stat -c '%g' /dev/ttyAMA* 2> /dev/null || : ; } | sort | uniq)
 echo "${DEVICE_GROUPS}" | while read -r line ; do
-    GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
+	if [ ! -z "${line}" ]
+	then
+		GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
 
-    if [ -z "${GROUP_NAME}" ]
-    then
-        GROUP_NAME="${USER}-${line}"
-        groupadd -g "${line}" "${GROUP_NAME}"
-    fi
+		# Create a dummy group with id of device if none exists
+		if [ -z "${GROUP_NAME}" ]
+		then
+			GROUP_NAME="${USER}-${line}"
+			groupadd -g "${line}" "${GROUP_NAME}"
+		fi
 
-    usermod -a -G "${GROUP_NAME}" "${USER}"
+		usermod -a -G "${GROUP_NAME}" "${USER}"
+	fi
 done
 usermod -a -G "root" "${USER}" # for usb and gpio
 
