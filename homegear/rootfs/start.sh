@@ -115,14 +115,14 @@ fi
 mkdir -p /var/run/homegear
 chown ${USER}:${USER} /var/run/homegear
 
-printf "\nAttached ttyUSB devices:\n$(ls -al /dev/tty*)\n"
-printf "Attached ttyAMA devices:\n$(ls -al /dev/ttyAMA*)\n"
-printf "Attached spidev devices:\n$(ls -al /dev/spidev*)\n"
+printf "\nAttached ttyUSB devices:\n%s\n", "$(ls -al /dev/ttyUSB*)"
+printf "Attached ttyAMA devices:\n%s\n", "$(ls -al /dev/ttyAMA*)"
+printf "Attached spidev devices:\n%s\n", "$(ls -al /dev/spidev*)"
 
 # Add user to the group of all /dev/ttyUSB and /devttyAMA devices so that they are usable
 DEVICE_GROUPS=$({ stat -c '%g' /dev/ttyUSB* 2> /dev/null || : ; stat -c '%g' /dev/ttyAMA* 2> /dev/null || : ; } | sort | uniq)
 echo "${DEVICE_GROUPS}" | while read -r line ; do
-	if [ ! -z "${line}" ]
+	if [ -n "${line}" ]
 	then
 		GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
 
