@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bashio
 
 _term() {
 	HOMEGEAR_PID="$(cat /var/run/homegear/homegear.pid)"
@@ -12,7 +12,7 @@ _term() {
 
 trap _term SIGTERM
 
-USER=homegear
+USER="$(bashio::config 'homegear_user')"
 
 echo "Homegear starting as user ${USER}"
 
