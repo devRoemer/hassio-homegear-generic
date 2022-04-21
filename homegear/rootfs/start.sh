@@ -138,7 +138,9 @@ echo "${DEVICE_GROUPS}" | while read -r line ; do
 done
 usermod -a -G "root" "${USER}" # for usb and gpio
 
-/etc/homegear/homegear-start.sh
+# Set permissions on interfaces and directories, export GPIOs.
+/usr/bin/homegear -u "${USER}" -g "${USER}" -p /var/run/homegear/homegear.pid -pre >> /dev/null 2>&1
+
 /usr/bin/homegear -u "${USER}" -g "${USER}" -p /var/run/homegear/homegear.pid &
 sleep 5
 /usr/bin/homegear-management -p /var/run/homegear/homegear-management.pid &
