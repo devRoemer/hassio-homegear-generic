@@ -14,7 +14,7 @@ trap _term SIGTERM
 
 USER="$(bashio::config 'homegear_user')"
 
-echo "Homegear starting as user ${USER}"
+echo "Initializing homegear as user ${USER}"
 
 mkdir -p /config/homegear \
 	/share/homegear/lib \
@@ -84,6 +84,7 @@ if ! [ -f /var/log/homegear/homegear.log ]; then
 fi
 
 if ! [ -f /etc/homegear/dh1024.pem ]; then
+	echo "Generating homegear certificates"
 	openssl genrsa -out /etc/homegear/homegear.key 2048
 	openssl req -batch -new -key /etc/homegear/homegear.key -out /etc/homegear/homegear.csr
 	openssl x509 -req -in /etc/homegear/homegear.csr -signkey /etc/homegear/homegear.key -out /etc/homegear/homegear.crt
@@ -115,13 +116,15 @@ fi
 mkdir -p /var/run/homegear
 chown "${USER}":"${USER}" /var/run/homegear
 
-printf "\nAttached ttyUSB devices:\n%s\n", "$(ls -al /dev/ttyUSB*)"
-printf "Attached ttyAMA devices:\n%s\n", "$(ls -al /dev/ttyAMA*)"
-printf "Attached spidev devices:\n%s\n", "$(ls -al /dev/spidev*)"
+printf "\nAttached ttyUSB devices:\n%s\n", "$(ls -al /dev/ttyUSB* 2> /dev/null)"
+printf "Attached ttyAMA devices:\n%s\n", "$(ls -al /dev/ttyAMA* 2> /dev/null)"
+printf "Attached spidev devices:\n%s\n", "$(ls -al /dev/spidev* 2> /dev/null)"
 
 # Add user to the group of all /dev/ttyUSB and /devttyAMA devices so that they are usable
+echo "Adding group of the devices to homegear user ${USER}"
 DEVICE_GROUPS=$({ stat -c '%g' /dev/ttyUSB* 2> /dev/null || : ; stat -c '%g' /dev/ttyAMA* 2> /dev/null || : ; } | sort | uniq)
 echo "${DEVICE_GROUPS}" | while read -r line ; do
+    echo "Found group id: ${line}"
 	if [ -n "${line}" ]
 	then
 		GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
@@ -129,14 +132,20 @@ echo "${DEVICE_GROUPS}" | while read -r line ; do
 		# Create a dummy group with id of device if none exists
 		if [ -z "${GROUP_NAME}" ]
 		then
+			echo "Group for id ${line} does not exist. Creating one."
 			GROUP_NAME="${USER}-${line}"
 			groupadd -g "${line}" "${GROUP_NAME}"
 		fi
 
+		echo "Adding group ${GROUP_NAME} to user ${USER}"
 		usermod -a -G "${GROUP_NAME}" "${USER}"
 	fi
 done
+
+echo "Adding group root to user ${USER}"
 usermod -a -G "root" "${USER}" # for usb and gpio
+
+echo "Starting Homegear (/usr/bin/homegear -u ${USER} -g ${USER})"
 
 # Set permissions on interfaces and directories, export GPIOs.
 /usr/bin/homegear -u "${USER}" -g "${USER}" -p /var/run/homegear/homegear.pid -pre >> /dev/null 2>&1
