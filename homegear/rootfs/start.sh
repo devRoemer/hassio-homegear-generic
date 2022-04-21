@@ -129,7 +129,7 @@ echo "${DEVICE_GROUPS}" | while read -r line ; do
 	if [ -n "${line}" ]
 	then
 	    echo "Detecting group name"
-		GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
+		GROUP_NAME=$(id -gn "${line}" 2> /dev/null || true)
 		echo "Group name is: ${GROUP_NAME}"
 
 		# Create a dummy group with id of device if none exists
