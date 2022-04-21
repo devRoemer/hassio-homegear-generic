@@ -71,6 +71,7 @@ fi
 rm -f /var/lib/homegear/homegear_updated
 
 if [[ -d /var/lib/homegear/node-blue/node-red ]]; then
+    echo "Preparing NodeBlue"
 	cd /var/lib/homegear/node-blue/node-red  || echo "Directory /var/lib/homegear/node-blue/node-red not found."
 	npm install
 fi
@@ -116,9 +117,9 @@ fi
 mkdir -p /var/run/homegear
 chown "${USER}":"${USER}" /var/run/homegear
 
-printf "\nAttached ttyUSB devices:\n%s\n", "$(ls -al /dev/ttyUSB* 2> /dev/null)"
-printf "Attached ttyAMA devices:\n%s\n", "$(ls -al /dev/ttyAMA* 2> /dev/null)"
-printf "Attached spidev devices:\n%s\n", "$(ls -al /dev/spidev* 2> /dev/null)"
+printf "\nAttached ttyUSB devices:\n%s\n" "$(ls -al /dev/ttyUSB* 2> /dev/null)"
+printf "Attached ttyAMA devices:\n%s\n" "$(ls -al /dev/ttyAMA* 2> /dev/null)"
+printf "Attached spidev devices:\n%s\n" "$(ls -al /dev/spidev* 2> /dev/null)"
 
 # Add user to the group of all /dev/ttyUSB and /devttyAMA devices so that they are usable
 echo "Adding group of the devices to homegear user ${USER}"
@@ -127,7 +128,9 @@ echo "${DEVICE_GROUPS}" | while read -r line ; do
     echo "Found group id: ${line}"
 	if [ -n "${line}" ]
 	then
+	    echo "Detecting group name"
 		GROUP_NAME=$(getent group "${line}" | cut -d: -f1)
+		echo "Group name is: ${GROUP_NAME}"
 
 		# Create a dummy group with id of device if none exists
 		if [ -z "${GROUP_NAME}" ]
