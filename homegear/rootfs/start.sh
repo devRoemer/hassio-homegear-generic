@@ -96,11 +96,11 @@ if ! [ -f /etc/homegear/dh1024.pem ]; then
 fi
 
 chown -R root:root /etc/homegear
-chown ${USER}:${USER} /etc/homegear/*.key
-chown ${USER}:${USER} /etc/homegear/*.pem
-chown ${USER}:${USER} /etc/homegear/nodeBlueCredentialKey.txt
+chown "${USER}":"${USER}" /etc/homegear/*.key
+chown "${USER}":"${USER}" /etc/homegear/*.pem
+chown "${USER}":"${USER}" /etc/homegear/nodeBlueCredentialKey.txt
 find /etc/homegear -type d -exec chmod 755 {} \;
-chown -R ${USER}:${USER} /var/log/homegear /var/lib/homegear
+chown -R "${USER}":"${USER}" /var/log/homegear /var/lib/homegear
 find /var/log/homegear -type d -exec chmod 750 {} \;
 find /var/log/homegear -type f -exec chmod 640 {} \;
 find /var/lib/homegear -type d -exec chmod 750 {} \;
@@ -113,7 +113,7 @@ if [[ -n $TZ ]]; then
 fi
 
 mkdir -p /var/run/homegear
-chown ${USER}:${USER} /var/run/homegear
+chown "${USER}":"${USER}" /var/run/homegear
 
 printf "\nAttached ttyUSB devices:\n%s\n", "$(ls -al /dev/ttyUSB*)"
 printf "Attached ttyAMA devices:\n%s\n", "$(ls -al /dev/ttyAMA*)"
@@ -139,10 +139,10 @@ done
 usermod -a -G "root" "${USER}" # for usb and gpio
 
 /etc/homegear/homegear-start.sh
-/usr/bin/homegear -u ${USER} -g ${USER} -p /var/run/homegear/homegear.pid &
+/usr/bin/homegear -u "${USER}" -g "${USER}" -p /var/run/homegear/homegear.pid &
 sleep 5
 /usr/bin/homegear-management -p /var/run/homegear/homegear-management.pid &
-/usr/bin/homegear-influxdb -u ${USER} -g ${USER} -p /var/run/homegear/homegear-influxdb.pid &
+/usr/bin/homegear-influxdb -u "${USER}" -g "${USER}" -p /var/run/homegear/homegear-influxdb.pid &
 tail -f /var/log/homegear/homegear-flows.log &
 tail -f /var/log/homegear/homegear-scriptengine.log &
 tail -f /var/log/homegear/homegear-management.log &
