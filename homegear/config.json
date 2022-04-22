@@ -14,14 +14,22 @@
   "devices": ["/dev/mem", "/dev/spidev0.0"],
   "map": ["config:rw", "share:rw"],
   "ports": {
+    "80/tcp": 2080,
+    "443/tcp": 2443,
+    "2000/tcp": 2000,
     "2001/tcp": 2001,
     "2002/tcp": 2002,
-    "2003/tcp": 2003
+    "2003/tcp": 2003,
+    "2004/tcp": 2004
   },
   "ports_description": {
+    "80/tcp": "Homegear port 80",
+    "443/tcp": "Homegear port 443",
+    "2000/tcp": "Homegear port 2000",
     "2001/tcp": "Homegear Web-Interface",
     "2002/tcp": "Homegear port 2002",
-    "2003/tcp": "Homegear port 2003"
+    "2003/tcp": "Homegear port 2003",
+    "2004/tcp": "Homegear port 2004"
   },
   "options": {
     "homegear_user": "homegear"
